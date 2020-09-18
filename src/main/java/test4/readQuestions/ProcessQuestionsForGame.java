@@ -26,6 +26,14 @@ public class ProcessQuestionsForGame {
         this.workingNumberList = new ArrayList<>();
     }
 
+//    public ProcessQuestionsForGame(ArrayList<Question> questionList) throws IOException, ParseException {
+//        this.questionList = questionList;
+//        this.questionBoardList_Easy = new ArrayList<>();
+//        this.questionBoardList_Hard = new ArrayList<>();
+//        this.workingQuestionList = new ArrayList<>();
+//        this.workingNumberList = new ArrayList<>();
+//    }
+
     public ArrayList<ArrayList<Question_board>> theProcessor(){
 
         //Easy Questions

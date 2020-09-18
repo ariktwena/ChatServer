@@ -3,6 +3,7 @@ package test4.readQuestions;
 
 
 import test4.classes.Question;
+import test4.classes.Question_board;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,10 +16,15 @@ public class ProcessQuestionsToArray {
     private final QuestionReader questionReader;
     private Question question;
 
-    public ProcessQuestionsToArray() {
+    public ProcessQuestionsToArray() throws IOException, ParseException {
         this.questionReader = new QuestionReader(new InputStreamReader(new InputStreamFromFile().injectInputStreamToReader()));
         this.questionsList = new ArrayList<>();
     }
+
+//    public ProcessQuestionsToArray(QuestionReader questionReader) {
+//        this.questionReader = questionReader;
+//        this.questionsList = new ArrayList<>();
+//    }
 
 
     public ArrayList<Question> theProcessor() throws IOException, ParseException {
@@ -29,11 +35,22 @@ public class ProcessQuestionsToArray {
         return matchQuestionsPerCategory();
     }
 
+//    public ArrayList<ArrayList<Question_board>> theProcessor() throws IOException, ParseException {
+//        addQuestionsToArray();
+//
+//        filterWrongScores();
+//
+//        ProcessQuestionsForGame processQuestionsForGame = new ProcessQuestionsForGame(matchQuestionsPerCategory());
+//
+//        return processQuestionsForGame.theProcessor();
+//    }
+
 
 
     public void addQuestionsToArray() throws IOException, ParseException {
 
         //Loop trough the data file via the reader, and extract valid questions that match the questions length
+//        while (this.question != null) {
         while ((this.question = questionReader.readQuestion()) != null) {
 
             //Add all questions to the questions array list one by one
