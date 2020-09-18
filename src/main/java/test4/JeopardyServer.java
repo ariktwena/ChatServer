@@ -3,9 +3,12 @@ package test4;
 import test3.Client2;
 import test3.Game;
 import test3.Server2;
+import test4.classes.Question_board;
+import test4.readQuestions.ProcessQuestionsForGame;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,12 +43,36 @@ public class JeopardyServer extends Thread {
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         JeopardyServer server = new JeopardyServer(new ServerSocket(2424));
         server.start();
 
+
+        /**
+         * Problem **************************************
+         */
+        ArrayList<ArrayList<Question_board>> theQuestionsArraysForTheGame = new ArrayList<>();
+        theQuestionsArraysForTheGame = new ProcessQuestionsForGame().theProcessor();
+
+        for(int i = 0 ; i < 20 ; i++){
+
+            theQuestionsArraysForTheGame.get(0).get(i).toString();
+
+        }
+        //*************************************************
+
+
+
         System.out.println("Server Started!");
     }
+
+
+
+
+
+
+
+
 
     public synchronized void addClient(JeopardyClient client) {
         System.out.println("Accepted client: " + client);
