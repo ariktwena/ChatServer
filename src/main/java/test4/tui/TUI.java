@@ -259,6 +259,19 @@ public class TUI {
         writer.flush();
     }
 
+    //
+    public void youLostYourTurn(){
+        writer.println("");
+        writer.println("You lost your turn");
+        writer.flush();
+    }
+
+    public void itsYourTurn(){
+        writer.println("");
+        writer.println("It's your turn now");
+        writer.flush();
+    }
+
     //Board header
     public void getBoardHeader(){
         writer.println(board.getHeader());

@@ -61,11 +61,11 @@ public class JeopardyGame {
         this.winner = null;
     }
 
-    private List<JeopardyClient> randomPlayer() {
-        List<JeopardyClient>  shuffledClients = new ArrayList<>(clients);
-        Collections.shuffle(shuffledClients);
-        return shuffledClients;
-    }
+//    private List<JeopardyClient> randomPlayer() {
+//        List<JeopardyClient>  shuffledClients = new ArrayList<>(clients);
+//        Collections.shuffle(shuffledClients);
+//        return shuffledClients;
+//    }
 
     public void play(JeopardyClient client, GameParticipant participant) throws InterruptedException, IOException {
 
@@ -124,20 +124,28 @@ public class JeopardyGame {
         }
     }
 
-    public synchronized void awaitForPlayer1() throws InterruptedException {
-        waitingGame -= 1;
-        if (waitingGame == 0) {
-            this.notifyAll();
-        } else {
-            while (waitingGame > 0) {
-                this.wait();
-            }
-        }
-    }
+//    public synchronized void awaitForPlayer1() throws InterruptedException {
+//        int count = 0;
+//
+//        waitingGame -= 1;
+//        if (waitingGame == 0) {
+//            this.notifyAll();
+//            count++;
+//        } else {
+//            while (waitingGame > 0) {
+//                this.wait();
+//            }
+//            count++;
+//        }
+//
+//        if(count == 2){
+//            waitingGame = 2;
+//        }
+//    }
 
     public void choose1stCategory(JeopardyClient client, GameParticipant participant) {
 //        turnPlayer1 = true;
-        randomPlayer().get(0).setPlayerTurn(true);
+        clients.get(0).setPlayerTurn(true);
         if (client.isPlayerTurn()) {
 //            tui.youWonThetoes();
             participant.youStartTheGameAndChooseCategory();
@@ -154,31 +162,46 @@ public class JeopardyGame {
 
             awaitForPlayer();
 
-
-            //Get the category title to display
+            if(!exitGame){
+                //Get the category title to display
 //            tui.getCategoryTitle(easyHardArray.get(0).get(index_start).getCategory().getCategoryName());
-            participant.getCategoryTitle(easyHardArray.get(0).get(index_start).getCategory().getCategoryName());
+                participant.getCategoryTitle(easyHardArray.get(0).get(index_start).getCategory().getCategoryName());
 
-            chooseQuestion(client, participant, easyHardArray.get(0));
+                chooseQuestion(client, participant, easyHardArray.get(0));
+            }
 
-            awaitForPlayer();
+            if(!exitGame){
+                awaitForPlayer();
 
-            displayTheQuestion(easyHardArray.get(0),index_start, question_index, participant, client);
+                displayTheQuestion(easyHardArray.get(0),index_start, question_index, participant, client);
 
 
-            awaitForPlayer();
+                awaitForPlayer();
 
-            getAnswerFromPlayer(easyHardArray.get(0), participant, client);
+                getAnswerFromPlayer(easyHardArray.get(0), participant, client);
 
-            awaitForPlayer();
+                awaitForPlayer();
 
-            //We restart the categories by showing the "loader"
-            participant.loaderLong();
+                if(switchPlayer){
+                    switchPlayer(client, participant);
+                }
+
+                //We restart the categories by showing the "loader"
+                participant.loaderLong();
 //            tui.loaderLong();
 
-            //Go back to category choice via "redirect
-            redirectAfterSwitch(participant, client);
+                this.switchPlayer = false;
+                this.waitingGame = 2;
 
+                //Go back to category choice via "redirect
+                redirectAfterSwitch(participant, client);
+            }
+
+            if(client.isPlayerTurn()){
+                participant.exitSwitch(client.getClientName());
+            } else {
+                participant.youAreTheWinner(client.getClientName());
+            }
 
 
         } else {
@@ -198,10 +221,11 @@ public class JeopardyGame {
 //        participant.drawBoard(list);
         participant.drawBoard(list);
 
-        //A list of the answers possibilities for the categories/questions
-        List<String> answerIndex = List.of("a", "b", "c", "d", "e", "f");
 
         if (client.isPlayerTurn()) {
+
+            //A list of the answers possibilities for the categories/questions
+            List<String> answerIndex = List.of("a", "b", "c", "d", "e", "f");
 
             //Player category choice
 //            playerCategoryChoice = tui.playerCategoryInput();
@@ -230,17 +254,23 @@ public class JeopardyGame {
             }
         } else {
 
-            waitingGame = 2;
+            this.waitingGame = 2;
+            try{
+                Thread.sleep(3000);
+            } catch (InterruptedException e){
+                throw new UnsupportedOperationException("You got an InterruptedException: " + e.getMessage());
+            }
         }
     }
 
     public void chooseQuestion(JeopardyClient client, GameParticipant participant, ArrayList<Question_board> list) throws InterruptedException, IOException {
 
 
-        //A list of the answers possibilities for the categories/questions
-        List<String> answerIndex = List.of("a", "b", "c", "d", "e", "f");
 
         if (client.isPlayerTurn()) {
+
+            //A list of the answers possibilities for the categories/questions
+            List<String> answerIndex = List.of("a", "b", "c", "d", "e");
 
 //            activePlayerName = client.getClientName();
 
@@ -269,7 +299,12 @@ public class JeopardyGame {
 
             }
         } else {
-            waitingGame = 2;
+            this.waitingGame = 2;
+            try{
+                Thread.sleep(3000);
+            } catch (InterruptedException e){
+                throw new UnsupportedOperationException("You got an InterruptedException: " + e.getMessage());
+            }
         }
     }
 
@@ -326,7 +361,13 @@ public class JeopardyGame {
                 numberOfAnswers += 1;
             }
         } else {
-            waitingGame = 2;
+
+            this.waitingGame = 2;
+            try{
+                Thread.sleep(3000);
+            } catch (InterruptedException e){
+                throw new UnsupportedOperationException("You got an InterruptedException: " + e.getMessage());
+            }
         }
 
     }
@@ -380,6 +421,8 @@ public class JeopardyGame {
             //We deactivet the question
             list.get(index_start + question_index).setAnswered("---");
 
+            this.switchPlayer = true;
+
         }
     }
 
@@ -401,16 +444,6 @@ public class JeopardyGame {
 
                 break;
             case "exit":
-//                if(client.isPlayerTurn()){
-//                    participant.exitSwitch(client.getClientName());
-//                } else {
-//                    this.notifyAll();
-//                    for(int i = 0 ; i < clients.size() ; i++){
-//                        if(!clients.get(i).isPlayerTurn()){
-//                            participant.youAreTheWinner(clients.get(i).getClientName());
-//                        }
-//                    }
-//                }
                 if(client.isPlayerTurn()){
                     client.setExitGame(true);
                 }
@@ -432,46 +465,19 @@ public class JeopardyGame {
 
         }
 
-//        else {
-//
-//            this.notifyAll();
-//            if(!client.isPlayerTurn()){
-//                participant.youAreTheWinner(client.getClientName());
-//            }
-//
-//        }
     }
 
 
-        //public void createBoard(ArrayList<Question> list, int cat1, int cat2, int cat3, int cat4, int cat5, int cat6){
-    public void drawBoard(ArrayList<Question_board> list) {
-        String score1, score2, score3, score4, score5, score6;
-
-        //We print the header of the board (The list has 30 spots. Every 5 spot is a now line of questions)
-        tui.getBoardHeader();
-        tui.getBoardCategoryLeftAlignFormat("A: " + list.get(0).getCategory().getCategoryName(),
-                                            "B: " +list.get(5).getCategory().getCategoryName(),
-                                            "C: " +list.get(10).getCategory().getCategoryName(),
-                                            "D: " +list.get(15).getCategory().getCategoryName(),
-                                            "E: " +list.get(20).getCategory().getCategoryName(),
-                                            "F: " +list.get(25).getCategory().getCategoryName());
-
-        //We print 5 rows of point on the board
-        for( int i = 0 ; i < 5 ; i++ ){
-            tui.getBoardSeparator();
-            score1 = list.get(0 + i).getAnswered() == null ? String.valueOf(list.get(0 + i).getScore()) : list.get(0 + i).getAnswered();
-            score2 = list.get(5 + i).getAnswered() == null ? String.valueOf(list.get(5 + i).getScore()) : list.get(5 + i).getAnswered();
-            score3 = list.get(10 + i).getAnswered() == null ? String.valueOf(list.get(10 + i).getScore()) : list.get(10 + i).getAnswered();
-            score4 = list.get(15 + i).getAnswered() == null ? String.valueOf(list.get(15 + i).getScore()) : list.get(15 + i).getAnswered();
-            score5 = list.get(20 + i).getAnswered() == null ? String.valueOf(list.get(20 + i).getScore()) : list.get(20 + i).getAnswered();
-            score6 = list.get(25 + i).getAnswered() == null ? String.valueOf(list.get(25 + i).getScore()) : list.get(25 + i).getAnswered();
-
-
-            tui.getBoardScoreLeftAlignFormatRow(score1, score2, score3, score4, score5, score6);
+    public synchronized void switchPlayer(JeopardyClient client, GameParticipant participant){
+        if(client.isPlayerTurn()){
+            client.setPlayerTurn(false);
+            participant.youLostYourTurn();
+        } else {
+            client.setPlayerTurn(true);
+            participant.itsYourTurn();
         }
-        tui.getBoardFooter();
-
     }
+
 
     public static interface GameParticipant {
 
@@ -527,6 +533,8 @@ public class JeopardyGame {
         void getQuestion(String question);
 
 
+        void youLostYourTurn();
 
+        void itsYourTurn();
     }
 }

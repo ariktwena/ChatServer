@@ -232,7 +232,15 @@ public class JeopardyClient extends Thread implements Closeable {
                         tui.getQuestion(question);
                     }
 
+                    @Override
+                    public void youLostYourTurn() {
+                        tui.youLostYourTurn();
+                    }
 
+                    @Override
+                    public void itsYourTurn() {
+                        tui.itsYourTurn();
+                    }
 
 
                 });
