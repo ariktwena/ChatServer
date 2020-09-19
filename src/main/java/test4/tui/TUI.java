@@ -138,7 +138,6 @@ public class TUI {
         writer.println("Here are the help commands:");
         writer.println("[Help]" + "\t" + "Get help and options");
         writer.println("[Score]" + "\t" + "See your current score");
-        writer.println("[Board]" + "\t" + "See the question status");
         writer.println("[Exit]" + "\t" + "Exit the game");
         writer.flush();
         loaderLong();
@@ -148,6 +147,13 @@ public class TUI {
     public void exitGame(String name){
         writer.println("");
         writer.println("I have never met a successful person that was a quitter. Successful people never, ever, give up! " + name);
+        writer.flush();
+    }
+
+    //Exit the game winner
+    public void exitGameWinner(String name){
+        writer.println("");
+        writer.println(name + " the other player has left the game. You are the winner!!!!");
         writer.flush();
     }
 
@@ -184,9 +190,9 @@ public class TUI {
 
 
     //Show chosen category
-    public void getCategoryTitle(String name, String titel){
+    public void getCategoryTitle(String titel){
         writer.println("");
-        writer.println(name + " has chosen the Category '" + titel + "', here are the the available questions and possible score prizes!");
+        writer.println("The chosen category is: " + titel );
         writer.flush();
     }
 

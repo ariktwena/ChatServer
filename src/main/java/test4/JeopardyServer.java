@@ -115,7 +115,7 @@ public class JeopardyServer extends Thread {
 
     private volatile JeopardyGame jeopardyGame;
 
-    public synchronized JeopardyGame getActiveGame () throws IOException, ParseException {
+    public synchronized JeopardyGame getActiveGame (TUI tui) throws IOException, ParseException {
 
         ArrayList<ArrayList<Question_board>> theQuestionsArraysForTheGame = new ArrayList<>();
         theQuestionsArraysForTheGame = new ProcessQuestionsForGame().theProcessor();
@@ -138,7 +138,7 @@ public class JeopardyServer extends Thread {
 
 
         if (jeopardyGame == null || jeopardyGame.done()) {
-            jeopardyGame = new JeopardyGame(2, clients, theQuestionsArraysForTheGame);
+            jeopardyGame = new JeopardyGame(2, clients, theQuestionsArraysForTheGame, tui);
         }
         return jeopardyGame;
     }

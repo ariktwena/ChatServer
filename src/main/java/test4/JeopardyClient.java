@@ -1,8 +1,5 @@
 package test4;
 
-import test3.Client2;
-import test3.Game;
-import test3.Server2;
 import test4.classes.Question_board;
 import test4.tui.TUI;
 
@@ -23,8 +20,9 @@ public class JeopardyClient extends Thread implements Closeable {
     private String name;
     private final ClientHandler handler;
     private final BlockingQueue<String> messageQueue;
-    private int score;
-    private boolean playerTurn;
+    private volatile int score;
+    private volatile boolean playerTurn;
+    private volatile boolean exitGame;
     private final TUI tui;
 //    private final ArrayList<ArrayList<Question_board>> theQuestionsArraysForTheGame;
 
@@ -38,6 +36,7 @@ public class JeopardyClient extends Thread implements Closeable {
         this.name = name;
         this.score = 0;
         this.playerTurn = false;
+        this.exitGame = false;
         this.tui = new TUI(new Scanner(socket.getInputStream()), new PrintWriter(socket.getOutputStream()));
 //        this.theQuestionsArraysForTheGame = theQuestionsArraysForTheGame;
     }
@@ -49,77 +48,13 @@ public class JeopardyClient extends Thread implements Closeable {
 
     @Override
     public void run() {
-//        Thread t = new Thread(() -> {
-//            try {
-//                System.out.println("We are here");
-//                tui.welcomeMessage(getClientName());
-//                System.out.println("After");
-//
-//                JeopardyClient superThis = this;
-//                JeopardyGame game = server.getActiveGame();
-//                game.play(new JeopardyGame.GameParticipant() {
-//                    @Override
-//                    public void notifyGameStart(String secretWord) {
-//                        handler.printMessage("Game started, write: " + secretWord);
-//                    }
-//
-//                    @Override
-//                    public void notifyWinner(JeopardyClient winner) {
-//                        if (winner.equals(superThis)) {
-//                            handler.printMessage("Yes you won");
-//                        } else {
-//                            handler.printMessage("Dammm, you lost to " + winner.getClientName());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public String getAnswer() {
-//                        return handler.waitForLine();
-//                    }
-//
-//                    @Override
-//                    public JeopardyClient getClient() {
-//                        return superThis;
-//                    }
-//
-//                    @Override
-//                    public void weHaveAllThePlayers() {
-//                        tui.weHaveAllThePlayers();
-//                        tui.loader();
-//                    }
-//
-//                    @Override
-//                    public void WeAreWaitingForMorePlayers() {
-//                        tui.waitingForOnMorePlayer(getClientName());
-//                    }
-//                });
-
-//                while (true) {
-//                    handler.showPrompt();
-//                    String line = handler.waitForLine();
-//                    if (line.startsWith("!rename")) {
-//                        String previousName = name;
-//                        name = handler.fetchName();
-//                        server.announceName(this, previousName);
-//
-//                    } else if (line.startsWith("!play")) {
-//
-//                    } else if (line.startsWith("!exit")) {
-//                        socket.close();
-//                        break;
-//                    } else{
-//                        server.broadcast(this, line);
-//                    }
-//                }
-//            } catch (InterruptedException | IOException e) { }
-//        });
         try {
             if(server.getNumberOfPlayer() <= 2){
                 name = tui.getPlayerName();
 
 
                 JeopardyClient superThis = this;
-                JeopardyGame game = server.getActiveGame();
+                JeopardyGame game = server.getActiveGame(tui);
                 game.play(superThis, new JeopardyGame.GameParticipant() {
 
                     @Override
@@ -204,9 +139,100 @@ public class JeopardyClient extends Thread implements Closeable {
                     }
 
                     @Override
-                    public void getCategoryTitle(String categoryName, String clientName) {
-                        tui.getCategoryTitle(clientName, categoryName);
+                    public void getCategoryTitle(String categoryName) {
+                        tui.getCategoryTitle(categoryName);
                     }
+
+                    @Override
+                    public void helpSwitch() {
+                        tui.loader();
+                        tui.getHelpGame();
+                    }
+
+                    @Override
+                    public void getScoreSwitch(String clientName, int score) {
+                        tui.getScore(clientName, score);
+                    }
+
+                    @Override
+                    public void getBoardSwitch(int numberOfAnswers) {
+                        tui.getBoardStatus(numberOfAnswers);
+                    }
+
+                    @Override
+                    public void backSwitch() {
+//                        tui.loader();
+                    }
+
+                    @Override
+                    public void exitSwitch(String clientName) throws IOException {
+                        tui.exitGame(clientName);
+                        socket.close();
+                    }
+
+                    @Override
+                    public void defaultSwitch() {
+                        tui.gameDefaultMessage();
+                    }
+
+                    @Override
+                    public void youAreTheWinner(String clientName) throws IOException {
+                        tui.exitGameWinner(clientName);
+                        socket.close();
+                    }
+
+                    @Override
+                    public void getHardBoardMessage() {
+                        tui.getHardBoardMessage();
+                    }
+
+                    @Override
+                    public void availableQuestionsInCategoryAndPoint(String choiseSpot, int score) {
+                        tui.availableQuestionsInCategoryAndPoint(choiseSpot, score);
+                    }
+
+                    @Override
+                    public void nonAvailableQuestionsInCategoryAndPoint(String choiseSpot) {
+                        tui.nonAvailableQuestionsInCategoryAndPoint(choiseSpot);
+
+                    }
+
+                    @Override
+                    public String playerQuestionInputChoice() {
+                        return tui.playerQuestionInputChoice().toLowerCase();
+                    }
+
+                    @Override
+                    public void loaderLong() {
+                        tui.loaderLong();
+                    }
+
+                    @Override
+                    public String playerQuestionInputAnswer() {
+                        return tui.playerQuestionInputAnswer();
+                    }
+
+                    @Override
+                    public void correctAnswer(String clientName, int score) {
+                        tui.correctAnswer(clientName, score);
+                    }
+
+                    @Override
+                    public void incorrectAnswer(String clientName, String answer) {
+                        tui.incorrectAnswer(clientName, answer);
+                    }
+
+                    @Override
+                    public void questionHasAlreadyBeenPlayed() {
+                        tui.questionHasAlreadyBeenPlayed();
+                    }
+
+                    @Override
+                    public void getQuestion(String question) {
+                        tui.getQuestion(question);
+                    }
+
+
 
 
                 });
@@ -272,6 +298,14 @@ public class JeopardyClient extends Thread implements Closeable {
 
     public void setPlayerTurn(boolean playerTurn) {
         this.playerTurn = playerTurn;
+    }
+
+    public boolean isExitGame() {
+        return exitGame;
+    }
+
+    public void setExitGame(boolean exitGame) {
+        this.exitGame = exitGame;
     }
 
     @Override
