@@ -1,5 +1,7 @@
 package test4;
 
+import test3.Client2;
+import test3.Game;
 import test4.classes.Question;
 import test4.classes.Question_board;
 import test4.tui.TUI;
@@ -71,8 +73,7 @@ public class JeopardyGame {
 
 
         await(participant, client);
-//        this.player1 = randomPlayer().get(0);
-//        this.player2 = randomPlayer().get(1);
+
 
         participant.weHaveAllThePlayers();
 //        tui.weHaveAllThePlayers();
@@ -80,24 +81,12 @@ public class JeopardyGame {
 //        tui.welcomeMessage(client.getClientName());
 //                        tui.loaderLong();
 
-//        participant.drawBoard(easyHardArray.get(0));
+
 
         choose1stCategory(client, participant);
 
         whatBoardToPlay(client, participant);
 
-
-
-
-
-//        participant.notifyGameStart(secretWord);
-//        while (true) {
-//            if (done() || participant.getAnswer().equals(secretWord)) {
-//                break;
-//            }
-//        }
-//        JeopardyClient winner = getAndSetWinner(participant.getClient());
-//        participant.notifyWinner(winner);
     }
 
     public synchronized void await(GameParticipant participant, JeopardyClient client) throws InterruptedException {
@@ -123,25 +112,7 @@ public class JeopardyGame {
             }
         }
     }
-
-//    public synchronized void awaitForPlayer1() throws InterruptedException {
-//        int count = 0;
-//
-//        waitingGame -= 1;
-//        if (waitingGame == 0) {
-//            this.notifyAll();
-//            count++;
-//        } else {
-//            while (waitingGame > 0) {
-//                this.wait();
-//            }
-//            count++;
-//        }
-//
-//        if(count == 2){
-//            waitingGame = 2;
-//        }
-//    }
+    
 
     public void choose1stCategory(JeopardyClient client, GameParticipant participant) {
 //        turnPlayer1 = true;
@@ -177,6 +148,11 @@ public class JeopardyGame {
 
 
                 awaitForPlayer();
+
+
+                playEnterGame(participant);
+                switchPlayerAfterEnterGame(client, participant);
+                done();
 
                 getAnswerFromPlayer(easyHardArray.get(0), participant, client);
 
@@ -309,6 +285,17 @@ public class JeopardyGame {
     }
 
 
+    public void playEnterGame(GameParticipant participant) throws InterruptedException {
+        
+        participant.notifyGameStart();
+        while (true) {
+            if (done() || participant.getAnswer().equals("")) {
+                break;
+            }
+        }
+        JeopardyClient winner = getAndSetWinner(participant.getClient());
+    }
+    
     public synchronized JeopardyClient getAndSetWinner(JeopardyClient client) {
         if (winner == null) {
             winner = client;
@@ -316,6 +303,16 @@ public class JeopardyGame {
         return winner;
     }
 
+    public synchronized void switchPlayerAfterEnterGame(JeopardyClient client, GameParticipant participant){
+        if(client != winner){
+            client.setPlayerTurn(false);
+            participant.toSlow();
+        } else {
+            client.setPlayerTurn(true);
+            participant.buzz();
+        }
+    }
+    
     public synchronized boolean done() {
         return winner != null;
     }
@@ -481,9 +478,9 @@ public class JeopardyGame {
 
     public static interface GameParticipant {
 
-        void notifyGameStart(String secretWord);
+        void notifyGameStart();
         void notifyWinner(JeopardyClient client);
-        String getAnswer();
+        String getAnswer() throws InterruptedException;
         JeopardyClient getClient();
 
         void weHaveAllThePlayers();
@@ -536,5 +533,9 @@ public class JeopardyGame {
         void youLostYourTurn();
 
         void itsYourTurn();
+
+        void toSlow();
+
+        void buzz();
     }
 }

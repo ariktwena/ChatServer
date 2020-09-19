@@ -58,8 +58,22 @@ public class JeopardyClient extends Thread implements Closeable {
                 game.play(superThis, new JeopardyGame.GameParticipant() {
 
                     @Override
-                    public void notifyGameStart(String secretWord) {
-                        handler.printMessage("Game started, write: " + secretWord);
+                    public void notifyGameStart() {
+                        handler.printMessage("Who is the fastest on the buzzer");
+                    }
+
+                    @Override
+                    public String getAnswer() {
+                        return handler.waitForLine();
+                    }
+                    @Override
+                    public void toSlow() {
+                        handler.printMessage("Sorry... to slow");
+                    }
+
+                    @Override
+                    public void buzz() {
+                        handler.printMessage("You won the turn!");
                     }
 
                     @Override
@@ -69,11 +83,6 @@ public class JeopardyClient extends Thread implements Closeable {
                         } else {
                             handler.printMessage("Dammm, you lost to " + winner.getClientName());
                         }
-                    }
-
-                    @Override
-                    public String getAnswer() {
-                        return handler.waitForLine();
                     }
 
                     @Override
@@ -243,6 +252,8 @@ public class JeopardyClient extends Thread implements Closeable {
                     }
 
 
+
+
                 });
 
 
@@ -355,7 +366,7 @@ public class JeopardyClient extends Thread implements Closeable {
             return prompt();
         }
 
-        private String waitForLine() {
+        private String waitForLine()  {
             return new Scanner(in).nextLine();
         }
 
@@ -365,6 +376,7 @@ public class JeopardyClient extends Thread implements Closeable {
         }
 
         public void printMessage(String message) {
+            out.println("");
             out.println(message);
             out.flush();
         }
